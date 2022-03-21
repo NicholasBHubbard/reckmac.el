@@ -110,9 +110,9 @@ macro recording aborts prematurely."
 
 ;;; --- core
 
-(defun reckmac-start-or-end-macro (register)
-  "If not currently recording a macro then start recording. If already recording
-a macro then finish recording."
+(defun reckmac-start-or-end-macro (&optional register)
+  "If not currently recording a macro then start recording to register REGISTER. 
+If already recording a macro then finish recording."
   (interactive
    (if reckmac--recording-macro-mode
        (list nil)
