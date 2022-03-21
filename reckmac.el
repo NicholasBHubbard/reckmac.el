@@ -170,7 +170,7 @@ a macro then finish recording."
 (defun reckmac-execute-last-macro ()
   "Execute the most recently recorded reckmac kbd macro."
   (interactive)
-  (reckmac-call-macro reckmac--current-register))
+  (reckmac-execute-macro reckmac--current-register))
 
 
 ;;; --- done
