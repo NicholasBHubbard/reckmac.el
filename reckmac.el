@@ -6,7 +6,7 @@
 
 ;; Author: Nicholas Hubbard <nicholashubbard@posteo.net>
 ;; URL: http://github.com/NicholasBHubbard/recmac.el
-;; Package-Requires: ((emacs "25.1") (seq "2.2.1"))
+;; Package-Requires: ((emacs "25.1"))
 ;; Version: 1.0
 ;; Created: 2022-03-19
 ;; By: Nicholas Hubbard <nicholashubbard@posteo.net>
