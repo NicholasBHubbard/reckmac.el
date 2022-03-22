@@ -2,6 +2,6 @@
 #+title: reckmac.el 
 #+author: Nicholas Hubbard
 
-*rec* ursive *k* eyboard *mac* ros
+*rec*\ursive *k*\eyboard *mac*\ros
 
 * Synopsis
