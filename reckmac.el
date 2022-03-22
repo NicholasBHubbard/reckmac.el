@@ -73,7 +73,7 @@ otherwise."
 ;;; --- core
 
 (defun reckmac-start-or-end-macro (&optional register)
-  "If not currently recording a macro then start recording to register REGISTER. 
+  "If not currently recording a macro then start recording to register REGISTER.
 If already recording a macro then finish recording."
   (interactive
    (if defining-kbd-macro
