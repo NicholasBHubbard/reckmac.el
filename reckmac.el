@@ -25,17 +25,18 @@
 ;;; --- internal state
 
 (defvar reckmac--register-macro-alist nil
-  "Internal data structure for reckmac macro state.")
+  "Internal data structure for reckmac macro state. DO NOT MODIFY MANUALLY!")
 
 (defvar reckmac--most-recent-register nil
   "Internal variable to track the most recent register that a macro was
-inserted into.")
+inserted into. DO NOT MODIFY MANUALLY!")
 
 (defvar reckmac--current-recording-register nil
-  "Internal variable to track the current register being recorded into.")
+  "Internal variable to track the current register being recorded into. DO NOT
+MODIFY MANUALLY!")
 
 (defvar reckmac--built-macro nil
-  "Internal data structure used to build macros.")
+  "Internal data structure used to build macros. DO NOT MODIFY MANUALLY!")
 
 
 ;;; --- implementation convenience functions
@@ -104,10 +105,12 @@ If already recording a macro then finish recording."
 (defun reckmac-execute-macro (register &optional n)
   "Execute the kbd macro stored in register REGISTER N times. If currently 
 recording a macro then recur on the macro stored in REGISTER."
-  (interactive (list (read-char "Execute macro in register: " t)
-                     (if current-prefix-arg
-                         (prefix-numeric-value current-prefix-arg)
-                       1)))
+  (interactive (if (null reckmac--register-macro-alist)
+                   (user-error "No reckmac macros have been recorded")
+                 (list (read-char "Execute macro in register: " t)
+                       (if current-prefix-arg
+                           (prefix-numeric-value current-prefix-arg)
+                         1))))
   (when (not n) (setq n 1))
   (when (< n 1) (user-error "The number %s is not greater or equal to 1" n))
   (let ((macro (reckmac-register-macro register))
