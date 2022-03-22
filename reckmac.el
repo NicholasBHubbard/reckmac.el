@@ -135,7 +135,8 @@ macro."
 (defun reckmac-recur (register)
   "Call the macro in REGISTER such that it will be included in the new macro
 that is currently being recorded."
-  (if (not defining-kbd-macro) (user-error "Cannot recur unless currently recording a macro"))
+  (when (not defining-kbd-macro)
+    (user-error "Cannot recur unless currently recording a macro"))
   (let ((recur-macro (reckmac-register-macro register))
         (inhibit-message t))
     (unless recur-macro
