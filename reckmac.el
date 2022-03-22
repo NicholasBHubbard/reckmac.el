@@ -104,7 +104,7 @@ If already recording a macro then finish recording."
 
 (defun reckmac-execute-macro (register)
   "Execute the kbd macro stored in register REGISTER. If currently recording a
-macro then recur on the macro in stored in REGISTER."
+macro then recur on the macro stored in REGISTER."
   (interactive (list (read-char "Execute macro in register: " t)))
   (let ((macro (reckmac-register-macro register)))
     (cond ((not macro)
