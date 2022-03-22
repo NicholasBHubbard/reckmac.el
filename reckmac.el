@@ -102,25 +102,33 @@ If already recording a macro then finish recording."
   (setf (alist-get reckmac--current-recording-register reckmac--register-macro-alist) reckmac--built-macro)
   (setq reckmac--most-recent-register reckmac--current-recording-register))
 
-(defun reckmac-execute-macro (register)
-  "Execute the kbd macro stored in register REGISTER. If currently recording a
-macro then recur on the macro stored in REGISTER."
-  (interactive (list (read-char "Execute macro in register: " t)))
-  (let ((macro (reckmac-register-macro register)))
-    (cond ((not macro)
-           (user-error "No macro in register %s" (char-to-string register)))
-          ((not defining-kbd-macro)
-           (execute-kbd-macro macro))
-          (t
-           (reckmac-recur register)))))
+(defun reckmac-execute-macro (register &optional n)
+  "Execute the kbd macro stored in register REGISTER N times. If currently 
+recording a macro then recur on the macro stored in REGISTER."
+  (interactive (list (read-char "Execute macro in register: " t)
+                     (if current-prefix-arg
+                         (prefix-numeric-value current-prefix-arg)
+                       1)))
+  (when (not n) (setq n 1))
+  (let ((macro (reckmac-register-macro register))
+        (i 0))
+    (when (not macro)
+      (user-error "No macro in register %s" (char-to-string register)))
+    (while (< i n)
+      (if defining-kbd-macro
+          (reckmac-recur register)
+        (execute-kbd-macro macro))
+      (setq i (1+ i)))))
 
-(defun reckmac-execute-last-macro ()
-  "Execute the most recently recorded reckmac kbd macro. If currently recording
-a macro then recur on the most previously defined macro."
-  (interactive)
+(defun reckmac-execute-last-macro (&optional n)
+  "Execute the most recently recorded reckmac kbd macro N time. N defaults to 1.
+If currently recording a macro then recur on the most previously defined macro."
+  (interactive (list (if current-prefix-arg
+                         (prefix-numeric-value current-prefix-arg)
+                       1)))
   (unless reckmac--most-recent-register
     (user-error "No reckmac macros have been recorded"))
-  (reckmac-execute-macro reckmac--most-recent-register))
+  (reckmac-execute-macro reckmac--most-recent-register n))
 
 (defun reckmac-recur (register)
   "Call the macro in REGISTER such that it will be included in the new macro
