@@ -117,20 +117,19 @@ a macro then recur on the most previously defined macro."
     (user-error "No reckmac macros have been recorded"))
   (reckmac-execute-macro reckmac--current-register))
 
-(defun reckmac-recur (&optional register)
+(defun reckmac-recur (register)
   "Call the macro in REGISTER such that it will be included in the new macro
 that is currently being recorded. 
 
 REGISTER defaults to `reckmac--current-register'."
   (if (not defining-kbd-macro) (user-error "Cannot recur unless currently recording a macro"))
-  (if (null register) (setq register reckmac--current-register))
   (let ((recur-macro (reckmac-register-macro register))
         (inhibit-message t))
     (unless recur-macro
       (user-error "No macro in register %s" register))
     (end-kbd-macro)
     (reckmac--append-to-built-macro last-kbd-macro recur-macro)
-    (execute-kbd-macro last-kbd-macro)
+    (execute-kbd-macro recur-macro)
     (start-kbd-macro nil)))
 
 
