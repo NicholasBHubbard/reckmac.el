@@ -145,6 +145,24 @@ that is currently being recorded."
     (execute-kbd-macro recur-macro)
     (start-kbd-macro nil)))
 
+(defun reckmac-name-macro (register)
+  "Name the macro in register REGISTER."
+  (interactive (list (read-char "Name macro in register: " t)))
+  (when (not (reckmac-register-p register))
+    (user-error "Invalid reckmac register %s" register))
+  (let* ((macro (reckmac-register-macro register))
+         (last-kbd-macro macro))
+    (when (not macro)
+      (user-error "No macro in register %s" (char-to-string register)))
+    (name-last-kbd-macro)))
+
+(defun reckmac-name-last-macro ()
+  "Name the last recorded reckmac macro."
+  (interactive)
+  (unless reckmac--most-recent-register
+    (user-error "No reckmac macros have been recorded"))
+  (reckmac-name-macro reckmac--most-recent-register))
+
 
 ;;; --- done
 
