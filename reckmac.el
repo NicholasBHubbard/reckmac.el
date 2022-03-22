@@ -27,8 +27,12 @@
 (defvar reckmac--register-macro-alist nil
   "Internal data structure for reckmac macro state.")
 
-(defvar reckmac--current-register nil
-  "Internal variable to track the current register.")
+(defvar reckmac--most-recent-register nil
+  "Internal variable to track the most recent register that a macro was
+inserted into.")
+
+(defvar reckmac--current-recording-register nil
+  "Internal variable to track the current register being recorded into.")
 
 (defvar reckmac--built-macro nil
   "Internal data structure used to build macros.")
@@ -84,7 +88,7 @@ If already recording a macro then finish recording."
   (if (not (reckmac-register-p register))
       (user-error "Invalid reckmac register %s" register)
     (setq reckmac--built-macro (make-vector 0 0))
-    (setq reckmac--current-register register)
+    (setq reckmac--current-recording-register register)
     (let ((inhibit-message t))
       (start-kbd-macro nil))
     (message "Recording macro to register %s" (char-to-string register))))
@@ -94,8 +98,9 @@ If already recording a macro then finish recording."
   (let ((inhibit-message t))
     (end-kbd-macro))
   (reckmac--append-to-built-macro last-kbd-macro)
-  (message "Finished recording macro to register %s" (char-to-string reckmac--current-register))
-  (setf (alist-get reckmac--current-register reckmac--register-macro-alist) reckmac--built-macro))
+  (message "Finished recording macro to register %s" (char-to-string reckmac--current-recording-register))
+  (setf (alist-get reckmac--current-recording-register reckmac--register-macro-alist) reckmac--built-macro)
+  (setq reckmac--most-recent-register reckmac--current-register))
 
 (defun reckmac-execute-macro (register)
   "Execute the kbd macro stored in register REGISTER. If currently recording a
@@ -113,15 +118,15 @@ macro then recur on the macro in stored in REGISTER."
   "Execute the most recently recorded reckmac kbd macro. If currently recording
 a macro then recur on the most previously defined macro."
   (interactive)
-  (unless reckmac--current-register
+  (unless reckmac--most-recent-register
     (user-error "No reckmac macros have been recorded"))
-  (reckmac-execute-macro reckmac--current-register))
+  (reckmac-execute-macro reckmac--most-recent-register))
 
 (defun reckmac-recur (register)
   "Call the macro in REGISTER such that it will be included in the new macro
 that is currently being recorded. 
 
-REGISTER defaults to `reckmac--current-register'."
+REGISTER defaults to `reckmac--current-recording-register'."
   (if (not defining-kbd-macro) (user-error "Cannot recur unless currently recording a macro"))
   (let ((recur-macro (reckmac-register-macro register))
         (inhibit-message t))
