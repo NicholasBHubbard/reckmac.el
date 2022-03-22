@@ -91,7 +91,6 @@ If already recording a macro then finish recording."
 
 (defun reckmac-end-macro ()
   "Finish recording a kbd macro."
-  (interactive)
   (let ((inhibit-message t))
     (end-kbd-macro))
   (reckmac--append-to-built-macro last-kbd-macro)
