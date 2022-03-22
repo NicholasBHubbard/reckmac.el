@@ -69,7 +69,6 @@ otherwise."
   "Return a list of all occupied registers."
   (mapcar #'car reckmac--register-macro-alist))
 
-
 ;;; --- core
 
 (defun reckmac-start-or-end-macro (&optional register)
@@ -132,23 +131,32 @@ macro."
     (user-error "No reckmac macros have been recorded"))
   (reckmac-execute-macro reckmac--most-recent-register n))
 
-(defun reckmac-name-macro (register)
-  "Name the macro in register REGISTER."
-  (interactive (list (read-char "Name macro in register: " t)))
+(defun reckmac-name-macro (register name)
+  "Assign the name NAME to the macro in register REGISTER.
+
+See also `reckmac-name-last-macro' and `name-last-kbd-macro'."
+  (interactive (list (read-char "Name macro in register: " t)
+                     (read-string "Name for macro: " nil nil nil t)))
+  (setq name (if (symbolp name) name (intern name)))
   (when (not (reckmac-register-p register))
     (user-error "Invalid reckmac register %s" register))
-  (let* ((macro (reckmac-register-macro register))
-         (last-kbd-macro macro))
+  (let ((macro (reckmac-register-macro register)))
     (when (not macro)
       (user-error "No macro in register %s" (char-to-string register)))
-    (name-last-kbd-macro)))
+    (when (fboundp name)
+      (user-error "Function %s is already defined" name))
+    (when (string= name "")
+      (user-error "No function name given"))
+    (fset name `(lambda () (interactive) (execute-kbd-macro ,macro)))))
 
-(defun reckmac-name-last-macro ()
-  "Name the last recorded reckmac macro."
-  (interactive)
+(defun reckmac-name-last-macro (name)
+  "Assign the name NAME to the last recorded reckmac macro.
+
+See also `reckmac-name-macro' and `name-last-kbd-macro'."
+  (interactive (list (read-string "Name for macro: " nil nil nil t)))
   (unless reckmac--most-recent-register
     (user-error "No reckmac macros have been recorded"))
-  (reckmac-name-macro reckmac--most-recent-register))
+  (reckmac-name-macro reckmac--most-recent-register name))
 
 (defun reckmac-recur (register)
   "Call the macro in REGISTER such that it will be included in the new macro
