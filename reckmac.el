@@ -70,6 +70,7 @@ otherwise."
   "Return a list of all occupied registers."
   (mapcar #'car reckmac--register-macro-alist))
 
+
 ;;; --- core
 
 (defun reckmac-start-or-end-macro (&optional register)
