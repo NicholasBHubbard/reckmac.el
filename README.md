@@ -37,9 +37,7 @@ around =reckmac-execute-macro=.
 
 *** reckmac-name-macro
 
-Name a reckmac macro. You will be prompted for the register of the macro you
-to name. Internally this function uses =name-last-kbd-macro= to give the macro
-a name.
+Name a reckmac macro. 
 
 *** reckmac-name-last-macro
 
