@@ -105,7 +105,9 @@ If already recording a macro then finish recording."
 
 (defun reckmac-execute-macro (register &optional n)
   "Execute the kbd macro stored in register REGISTER N times. If currently 
-recording a macro then recur on the macro stored in REGISTER."
+recording a macro then recur on the macro stored in REGISTER.
+
+See also `reckmac-execute-last-macro'."
   (interactive (if (null reckmac--register-macro-alist)
                    (user-error "No reckmac macros have been recorded")
                  (list (read-char "Execute macro in register: " t)
@@ -127,7 +129,9 @@ recording a macro then recur on the macro stored in REGISTER."
 (defun reckmac-execute-last-macro (&optional n)
   "Execute the most recently recorded reckmac kbd macro N times. N defaults to 
 1. If currently recording a macro then recur on the most previously defined 
-macro."
+macro.
+
+See also `reckmac-execute-macro'."
   (interactive (list (if current-prefix-arg
                          (prefix-numeric-value current-prefix-arg)
                        1)))
