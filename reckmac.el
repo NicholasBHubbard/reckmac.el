@@ -82,7 +82,7 @@ If already recording a macro then finish recording."
 (defun reckmac-start-macro (register)
   "Begin recording a kbd macro that will be stored in the register REGISTER."
   (if (not (reckmac-register-p register))
-      (user-error "Invalid reckmac register: %s" register)
+      (user-error "Invalid reckmac register %s" register)
     (setq reckmac--built-macro (make-vector 0 0))
     (setq reckmac--current-register register)
     (let ((inhibit-message t))
@@ -104,7 +104,7 @@ macro then recur on the macro in stored in REGISTER."
   (interactive (list (read-char "Execute macro in register: " t)))
   (let ((macro (reckmac-register-macro register)))
     (cond ((not macro)
-           (user-error "No macro in register %s ... aborting macro recording" (char-to-string register)))
+           (user-error "No macro in register %s" (char-to-string register)))
           ((not defining-kbd-macro)
            (execute-kbd-macro macro))
           (t
@@ -114,6 +114,8 @@ macro then recur on the macro in stored in REGISTER."
   "Execute the most recently recorded reckmac kbd macro. If currently recording
 a macro then recur on the most previously defined macro."
   (interactive)
+  (unless reckmac--current-register
+    (user-error "No reckmac macros have been recorded"))
   (reckmac-execute-macro reckmac--current-register))
 
 (defun reckmac-recur (&optional register)
@@ -125,6 +127,8 @@ REGISTER defaults to `reckmac--current-register'."
   (if (null register) (setq register reckmac--current-register))
   (let ((recur-macro (reckmac-register-macro register))
         (inhibit-message t))
+    (unless recur-macro
+      (user-error "No macro in register %s" register))
     (end-kbd-macro)
     (reckmac--append-to-built-macro last-kbd-macro recur-macro)
     (execute-kbd-macro last-kbd-macro)
