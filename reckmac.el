@@ -132,20 +132,6 @@ macro."
     (user-error "No reckmac macros have been recorded"))
   (reckmac-execute-macro reckmac--most-recent-register n))
 
-(defun reckmac-recur (register)
-  "Call the macro in REGISTER such that it will be included in the new macro
-that is currently being recorded."
-  (when (not defining-kbd-macro)
-    (user-error "Cannot recur unless currently recording a macro"))
-  (let ((recur-macro (reckmac-register-macro register))
-        (inhibit-message t))
-    (unless recur-macro
-      (user-error "No macro in register %s" register))
-    (end-kbd-macro)
-    (reckmac--append-to-built-macro last-kbd-macro recur-macro)
-    (execute-kbd-macro recur-macro)
-    (start-kbd-macro nil)))
-
 (defun reckmac-name-macro (register)
   "Name the macro in register REGISTER."
   (interactive (list (read-char "Name macro in register: " t)))
@@ -163,6 +149,20 @@ that is currently being recorded."
   (unless reckmac--most-recent-register
     (user-error "No reckmac macros have been recorded"))
   (reckmac-name-macro reckmac--most-recent-register))
+
+(defun reckmac-recur (register)
+  "Call the macro in REGISTER such that it will be included in the new macro
+that is currently being recorded."
+  (when (not defining-kbd-macro)
+    (user-error "Cannot recur unless currently recording a macro"))
+  (let ((recur-macro (reckmac-register-macro register))
+        (inhibit-message t))
+    (unless recur-macro
+      (user-error "No macro in register %s" register))
+    (end-kbd-macro)
+    (reckmac--append-to-built-macro last-kbd-macro recur-macro)
+    (execute-kbd-macro recur-macro)
+    (start-kbd-macro nil)))
 
 
 ;;; --- done
