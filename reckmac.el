@@ -110,6 +110,7 @@ recording a macro then recur on the macro stored in REGISTER."
                          (prefix-numeric-value current-prefix-arg)
                        1)))
   (when (not n) (setq n 1))
+  (when (< n 1) (user-error "The number %s is not greater or equal to 1" n))
   (let ((macro (reckmac-register-macro register))
         (i 0))
     (when (not macro)
@@ -121,8 +122,9 @@ recording a macro then recur on the macro stored in REGISTER."
       (setq i (1+ i)))))
 
 (defun reckmac-execute-last-macro (&optional n)
-  "Execute the most recently recorded reckmac kbd macro N time. N defaults to 1.
-If currently recording a macro then recur on the most previously defined macro."
+  "Execute the most recently recorded reckmac kbd macro N times. N defaults to 
+1. If currently recording a macro then recur on the most previously defined 
+macro."
   (interactive (list (if current-prefix-arg
                          (prefix-numeric-value current-prefix-arg)
                        1)))
