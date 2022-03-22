@@ -34,23 +34,6 @@
   "Internal data structure used to build macros.")
 
 
-;;; --- minor mode
-
-(defvar reckmac--recording-macro-mode-map (make-sparse-keymap)
-  "Keymap for reckmac--recording-macro-mode.")
-
-(define-minor-mode reckmac--recording-macro-mode
-  "Toggle reckmac--recording-macro-mode.
-
-This mode should not be turned on manually! Used for internal implementation of
-reckmac."
-  :global t
-  :require 'reckmac
-  :keymap reckmac--recording-macro-mode-map
-  (if reckmac--recording-macro-mode
-      (reckmac-advise-end-kbd-macro)))
-
-
 ;;; --- implementation convenience functions
 
 (defun reckmac-vector-macro (macro)
@@ -63,16 +46,9 @@ reckmac."
   "Return T if REGISTER is a valid reckmac register and return NIL otherwise."
   (characterp register))
 
-(defun reckmac-register-or-error (register)
-  "Throw an error if REGISTER is not a valid reckmac register."
-  (if (reckmac-register-p register)
-      t
-    (error "Invalid reckmac register: \"%s\"" register)))
-
 (defun reckmac-register-occupied-p (register)
   "Return T if the reckmac register REGISTER contains a macro and return NIL
 otherwise."
-  (reckmac-register-or-error register)
   (if (assoc register reckmac--register-macro-alist #'=) t nil))
 
 (defun reckmac--append-to-built-macro (&rest macros)
@@ -83,23 +59,11 @@ otherwise."
 
 (defun reckmac-register-macro (register)
   "Return the macro stored in the register REGISTER."
-  (reckmac-register-or-error register)
   (cdr (assoc register reckmac--register-macro-alist #'=)))
 
 (defun reckmac-occupied-registers ()
   "Return a list of all occupied registers."
   (mapcar #'car reckmac--register-macro-alist))
-
-(defun reckmac-advice-end-kbd-macro ()
-  "Advice `end-kbd-macro' to turn off `reckmac--recording-macro-mode' in case
-macro recording aborts prematurely."
-  (advice-add 'end-kbd-macro :after '(lambda (&rest _args)
-                                       (reckmac--recording-macro-mode 0))))
-
-(defun reckmac-unadvice-end-kbd-macro ()
-  "Remove advice added by `reckmac-advice-end-kbd-macro'."
-  (advice-remove 'end-kbd-macro '(lambda (&rest _args)
-                                   (reckmac--recording-macro-mode 0))))
 
 
 ;;; --- core
@@ -108,22 +72,22 @@ macro recording aborts prematurely."
   "If not currently recording a macro then start recording to register REGISTER. 
 If already recording a macro then finish recording."
   (interactive
-   (if reckmac--recording-macro-mode
+   (if defining-kbd-macro
        (list nil)
      (list (read-char "Record to register: " t))))
-  (if reckmac--recording-macro-mode
+  (if defining-kbd-macro
       (reckmac-end-macro)
     (reckmac-start-macro register)))
 
 (defun reckmac-start-macro (register)
   "Begin recording a kbd macro that will be stored in the register REGISTER."
-  (reckmac-register-or-error register)
-  (setq reckmac--built-macro (make-vector 0 0))
-  (setq reckmac--current-register register)
-  (let ((inhibit-message t))
-    (start-kbd-macro nil))
-  (reckmac--recording-macro-mode 1)
-  (message "Recording kbd macro to register \"%s\"" (char-to-string register)))
+  (if (not (reckmac-register-p register))
+      (user-error "Invalid reckmac register: %s" register)
+    (setq reckmac--built-macro (make-vector 0 0))
+    (setq reckmac--current-register register)
+    (let ((inhibit-message t))
+      (start-kbd-macro nil))
+    (message "Recording macro to register %s" (char-to-string register))))
 
 (defun reckmac-end-macro ()
   "Finish recording a kbd macro."
@@ -131,22 +95,20 @@ If already recording a macro then finish recording."
   (let ((inhibit-message t))
     (end-kbd-macro))
   (reckmac--append-to-built-macro last-kbd-macro)
-  (reckmac--recording-macro-mode 0)
-  (message "Finished recording kbd macro to register \"%s\"" (char-to-string reckmac--current-register))
+  (message "Finished recording macro to register %s" (char-to-string reckmac--current-register))
   (setf (alist-get reckmac--current-register reckmac--register-macro-alist) reckmac--built-macro))
 
 (defun reckmac-execute-macro (register)
-  "Execute the kbd macro stored in register REGISTER."
+  "Execute the kbd macro stored in register REGISTER. If currently recording a
+macro then recur on the macro in stored in REGISTER."
   (interactive (list (read-char "Execute macro in register: " t)))
   (let ((macro (reckmac-register-macro register)))
     (cond ((not macro)
-           (message "No macro in register \"%s\" ... aborting macro recording" (char-to-string register))
-           (let ((inhibit-message t))
-             (reckmac-end-macro)))
-          (reckmac--recording-macro-mode
-           (reckmac-recur register))
+           (user-error "No macro in register %s ... aborting macro recording" (char-to-string register)))
+          ((not defining-kbd-macro)
+           (execute-kbd-macro macro))
           (t
-           (execute-kbd-macro macro)))))
+           (reckmac-recur register)))))
 
 (defun reckmac-execute-last-macro ()
   "Execute the most recently recorded reckmac kbd macro. If currently recording
@@ -159,13 +121,12 @@ a macro then recur on the most previously defined macro."
 that is currently being recorded. 
 
 REGISTER defaults to `reckmac--current-register'."
+  (if (not defining-kbd-macro) (user-error "Cannot recur unless currently recording a macro"))
   (if (null register) (setq register reckmac--current-register))
   (let ((recur-macro (reckmac-register-macro register))
         (inhibit-message t))
-    (reckmac-unadvice-end-kbd-macro)
     (end-kbd-macro)
-    (reckmac-advice-end-kbd-macro)
-    (reckmac--append-to-built-macro recorded-macro recur-macro)
+    (reckmac--append-to-built-macro last-kbd-macro recur-macro)
     (execute-kbd-macro last-kbd-macro)
     (start-kbd-macro nil)))
 
