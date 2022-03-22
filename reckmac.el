@@ -5,7 +5,7 @@
 ;; Licensed under the same terms as Emacs and under the MIT license.
 
 ;; Author: Nicholas Hubbard <nicholashubbard@posteo.net>
-;; URL: http://github.com/NicholasBHubbard/recmac.el
+;; URL: http://github.com/NicholasBHubbard/reckmac.el
 ;; Package-Requires: ((emacs "25.1"))
 ;; Version: 1.0
 ;; Created: 2022-03-19
