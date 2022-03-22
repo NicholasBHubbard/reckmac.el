@@ -100,7 +100,7 @@ If already recording a macro then finish recording."
   (reckmac--append-to-built-macro last-kbd-macro)
   (message "Finished recording macro to register %s" (char-to-string reckmac--current-recording-register))
   (setf (alist-get reckmac--current-recording-register reckmac--register-macro-alist) reckmac--built-macro)
-  (setq reckmac--most-recent-register reckmac--current-register))
+  (setq reckmac--most-recent-register reckmac--current-recording-register))
 
 (defun reckmac-execute-macro (register)
   "Execute the kbd macro stored in register REGISTER. If currently recording a
